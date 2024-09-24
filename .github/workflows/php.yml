@@ -31,8 +31,8 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config --global user.email "ircfspace@gmail.com"
-          git config --global user.name "ircfspace"
+          git config --global user.email "szlear@gmail.com"
+          git config --global user.name "tagma067001068"
 
       - name: Commit changes
         run: |

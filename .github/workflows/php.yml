@@ -5,7 +5,10 @@ on:
   push:
     branches: [ "main" ]
   schedule:
-    - cron: '0 * * * *'
+    # Runs at 00 minutes past the hour, every 6 hours.
+    - cron: '00 0/6 * * *'
+    # crontab文件的格式：M H D m d cmd.
+    # M: 分钟（0-59），H：小时（0-23），D：天（1-31），m: 月（1-12），d: 一星期内的天（0~6，0为星期天）。
 
 jobs:
   build:
@@ -31,8 +34,12 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config --global user.email "ircfspace@gmail.com"
-          git config --global user.name "ircfspace"
+          # $(date +'%Y-%m-%d %H:%M:%S') 获取当前日期时间。
+          mkdir -p $(date +'%Y-%m-%d')/$(date +'%H'):00
+          mv -f full.list $(date +'%Y-%m-%d')/$(date +'%H'):00/full.list
+          mv -f lite.list $(date +'%Y-%m-%d')/$(date +'%H'):00/lite.list
+          git config --global user.email "szlear@gmail.com"
+          git config --global user.name "tagma067001068"
 
       - name: Commit changes
         run: |

@@ -23,7 +23,7 @@
         $x = 0;
         $full = "";
         foreach($keys as $key) {
-            if ( $x >= 100 ) {
+            if ( $x >= 200 ) {
                 break;
             }
             $full .= $key.( $key !== end($keys) ? "\n" : "");
@@ -35,7 +35,7 @@
         $lite = "";
         shuffle($keys);
         foreach($keys as $key) {
-            if ( $i >= 15 ) {
+            if ( $i >= 20 ) {
                 break;
             }
             $lite .= $key.( $key !== end($keys) ? "\n" : "");

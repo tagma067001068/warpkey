@@ -1,0 +1,64 @@
+name: "Collect WARP+ KEYS"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  schedule:
+    # Runs at 00 minutes past the hour, every 6 hours.
+    - cron: '00 0/6 * * *'
+    # crontab文件的格式：M H D m d cmd.
+    # M: 分钟（0-59），H：小时（0-23），D：天（1-31），m: 月（1-12），d: 一星期内的天（0~6，0为星期天）。
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -e {0}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          NODE_VERSION: '20'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+
+      - name: Execute PHP script
+        run: php crawler.php
+
+      - name: Configure Git
+        run: |
+          # $(date +'%Y-%m-%d %H:%M:%S') 获取当前日期时间。
+          mkdir -p $(date +'%Y-%m-%d')/$(date +'%H'):00
+          mv -f full.list $(date +'%Y-%m-%d')/$(date +'%H'):00/full.list
+          mv -f lite.list $(date +'%Y-%m-%d')/$(date +'%H'):00/lite.list
+
+#         Delete before 10 day ago directory
+#         DIR_PATH="./${{ github.event.inputs.target_date }}"
+          DIR_PATH=$(date +'%Y-%m-%d' -d'-10 day')
+          if [ -d "$DIR_PATH" ]; then
+             echo "Deleting directory: $DIR_PATH"
+             rm -rf "$DIR_PATH"
+          else
+             echo "Directory $DIR_PATH does not exist"
+             exit 1
+          fi
+
+          git config --global user.email "szlear@gmail.com"
+          git config --global user.name "tagma067001068"
+
+      - name: Commit changes
+        run: |
+          git add -A
+          git diff --cached --quiet || git commit -m "💡 Automatic update - $(TZ='Asia/Tehran' date '+%Y-%m-%d %H:%M')"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}

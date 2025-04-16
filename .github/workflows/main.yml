@@ -39,7 +39,7 @@ jobs:
           mv -f full.list $(date +'%Y-%m-%d')/$(date +'%H'):00/full.list
           mv -f lite.list $(date +'%Y-%m-%d')/$(date +'%H'):00/lite.list
 
-#         Delete before 10 day ago directory
+#         Delete before 10 day ago directory.
 #         DIR_PATH="./${{ github.event.inputs.target_date }}"
           DIR_PATH=$(date +'%Y-%m-%d' -d'-10 day')
           if [ -d "$DIR_PATH" ]; then

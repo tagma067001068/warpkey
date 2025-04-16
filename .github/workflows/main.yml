@@ -29,6 +29,34 @@ jobs:
         with:
           php-version: '8.0'
 
+      - name: Calculate threshold date
+        id: date-calc
+        run: |
+          # 生成两种格式的日期：
+          # 1. 人类可读格式 (YYYY-MM-DD)
+          # 2. 去横杠数字格式 (YYYYMMDD) 用于比较
+          THRESHOLD_DATE=$(date -d "10 days ago" +%Y-%m-%d)
+          THRESHOLD_DATE_NUM=$(date -d "10 days ago" +%Y%m%d)
+          echo "threshold_date=$THRESHOLD_DATE" >> $GITHUB_OUTPUT
+          echo "threshold_date_num=$THRESHOLD_DATE_NUM" >> $GITHUB_OUTPUT
+
+      - name: Find and delete old directories
+        run: |
+          find * -maxdepth 0 -type d -regextype posix-extended \
+            -regex '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' | while read dir; do
+          
+            # 将目录名转换为纯数字格式 (YYYYMMDD)
+            dir_num=$(echo "$dir" | tr -d '-')
+
+            # 数值比较日期
+            if [ $dir_num -le ${{ steps.date-calc.outputs.threshold_date_num }} ]; then
+              echo "Deleting: $dir (对应数字日期: $dir_num)"
+              rm -rf "$dir"
+            else
+              echo "保留: $dir (数字日期: $dir_num > ${{ steps.date-calc.outputs.threshold_date_num }})"
+            fi
+          done
+
       - name: Execute PHP script
         run: php crawler.php
 
@@ -38,18 +66,6 @@ jobs:
           mkdir -p $(date +'%Y-%m-%d')/$(date +'%H'):00
           mv -f full.list $(date +'%Y-%m-%d')/$(date +'%H'):00/full.list
           mv -f lite.list $(date +'%Y-%m-%d')/$(date +'%H'):00/lite.list
-
-#         Delete before 10 day ago directory.
-#         DIR_PATH="./${{ github.event.inputs.target_date }}"
-          DIR_PATH=$(date +'%Y-%m-%d')
-          if [ -d "$DIR_PATH" ]; then
-             echo "Deleting directory: $DIR_PATH"
-             rm -rf "$DIR_PATH"
-          else
-             echo "Directory $DIR_PATH does not exist"
-             exit 1
-          fi
-
           git config --global user.email "szlear@gmail.com"
           git config --global user.name "tagma067001068"
 

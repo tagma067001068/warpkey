@@ -24,4 +24,4 @@ jobs:
     - name: Delete target directory
       run: |
         DIR_PATH=$(date +'%Y-%m-%d' -d'-10 day')
-        echo DIR_PATH
+        echo $DIR_PATH
